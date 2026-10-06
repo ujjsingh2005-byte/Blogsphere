@@ -15,7 +15,7 @@ const usersData = [
     password: 'password123',
     role: 'admin',
     isBlocked: false,
-    profileImage: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+    profileImage: '/avatars/ujjwal.jpg',
     bio: 'Full-Stack Developer & CSE Undergrad at AKTU Lucknow (Sep 2023 – May 2027). Creator of CourseHub, Smart Parking, and Bharat Sign AI.'
   },
   {

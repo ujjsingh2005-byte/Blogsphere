@@ -8,6 +8,11 @@
 
 **BlogSphere** is built upon a strict **Layered (N-Tier) Full-Stack Architecture** where every boundary—Presentation, Gateway Routing, Validation, Business Logic / Services, Data Access (ODM), and Persistence—is modular and decoupled.
 
+### 🌐 Live Production References
+- **Frontend SPA (Vercel)**: [https://blogsphere-rust-sigma.vercel.app/](https://blogsphere-rust-sigma.vercel.app/)
+- **Backend REST API (Render)**: [https://blogsphere-ppxu.onrender.com](https://blogsphere-ppxu.onrender.com)
+- **Source Code (GitHub)**: [https://github.com/ujjsingh2005-byte/Blogsphere.git](https://github.com/ujjsingh2005-byte/Blogsphere.git)
+
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                           PRESENTATION TIER                             │

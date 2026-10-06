@@ -14,6 +14,11 @@
 - **Maintainability**: Clear separation of concerns utilizing a service layer on the frontend, centralized Express controllers and middleware on the backend, and schema-enforced Mongoose models.
 - **Responsiveness & UX**: Responsive layout supporting Mobile, Tablet, and Desktop breakpoints, optimistic UI updates, skeleton loaders, and non-blocking toast notifications.
 
+### 1.2 Live Deployment Endpoints
+- 🚀 **Frontend SPA (Vercel)**: [https://blogsphere-rust-sigma.vercel.app/](https://blogsphere-rust-sigma.vercel.app/)
+- ⚡ **Backend REST API (Render)**: [https://blogsphere-ppxu.onrender.com](https://blogsphere-ppxu.onrender.com)
+- 🐙 **Repository (GitHub)**: [https://github.com/ujjsingh2005-byte/Blogsphere.git](https://github.com/ujjsingh2005-byte/Blogsphere.git)
+
 ---
 
 ## 2. Technology Stack Specification

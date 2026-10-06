@@ -10,6 +10,11 @@
 
 The platform is designed with a **colorful, professional, accessible, and responsive UI** backed by a robust, secure **Node.js/Express REST API** and **MongoDB (Mongoose)** database.
 
+### 🌐 Live Production Deployments & Links
+- **Production Web Application (Vercel)**: [https://blogsphere-rust-sigma.vercel.app/](https://blogsphere-rust-sigma.vercel.app/)
+- **Production REST API (Render)**: [https://blogsphere-ppxu.onrender.com](https://blogsphere-ppxu.onrender.com)
+- **Source Code (GitHub)**: [https://github.com/ujjsingh2005-byte/Blogsphere.git](https://github.com/ujjsingh2005-byte/Blogsphere.git)
+
 ---
 
 ## 2. Core User Roles & Role-Based Access Control (RBAC)

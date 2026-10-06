@@ -4,6 +4,15 @@ BlogSphere is an enterprise-grade, high-performance, full-stack blogging platfor
 
 ---
 
+## 🌐 Live Deployments & Repository Links
+
+- 🚀 **Live Web Application (Vercel)**: [https://blogsphere-rust-sigma.vercel.app/](https://blogsphere-rust-sigma.vercel.app/)
+- ⚡ **Live Backend REST API (Render)**: [https://blogsphere-ppxu.onrender.com](https://blogsphere-ppxu.onrender.com)
+- 🐙 **GitHub Repository**: [https://github.com/ujjsingh2005-byte/Blogsphere.git](https://github.com/ujjsingh2005-byte/Blogsphere.git)
+- 🏥 **API Health Check**: [https://blogsphere-ppxu.onrender.com/api/health](https://blogsphere-ppxu.onrender.com/api/health)
+
+---
+
 ## 👤 User vs 👑 Admin Role Architecture
 
 | Feature | 👤 User (Normal) | 👑 Admin (Platform Overseer) |

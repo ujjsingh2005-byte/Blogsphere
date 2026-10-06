@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   User,
   Mail,
@@ -13,7 +13,10 @@ import {
   MapPin,
   ExternalLink,
   Layers,
-  Award
+  Award,
+  Upload,
+  Camera,
+  Image as ImageIcon
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -22,6 +25,7 @@ import { formatDate } from '../utils/dateUtils';
 const ProfilePage = () => {
   const { user, updateProfile } = useAuth();
   const { toastSuccess, toastError, toastInfo } = useToast();
+  const fileInputRef = useRef(null);
 
   const [formData, setFormData] = useState({
     name: user?.name || '',
@@ -35,6 +39,35 @@ const ProfilePage = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // Handle direct file upload from user's computer / phone
+  const handleFileUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toastError('Please select a valid image file (JPG, PNG, WEBP).');
+      return;
+    }
+
+    // Validate size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toastError('Image size exceeds 5MB. Please choose a smaller image.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const base64String = event.target.result;
+      setFormData((prev) => ({ ...prev, profileImage: base64String }));
+      toastSuccess('Photo loaded! Click "Save Changes" below to apply.');
+    };
+    reader.onerror = () => {
+      toastError('Failed to read image file.');
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleGenerateRandomAvatar = () => {
@@ -98,9 +131,18 @@ const ProfilePage = () => {
           <span>Account & Developer Profile</span>
         </h1>
         <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-          Manage your personal biography, credentials, and showcase engineering highlights.
+          Upload your personal photo, update your biography, and manage account credentials.
         </p>
       </div>
+
+      {/* Hidden File Input */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileUpload}
+        accept="image/png, image/jpeg, image/jpg, image/webp, image/gif"
+        className="hidden"
+      />
 
       {/* Profile Settings Card */}
       <div className="bg-white dark:bg-navy-850 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-sm overflow-hidden">
@@ -108,7 +150,7 @@ const ProfilePage = () => {
         <div className="h-36 bg-gradient-to-r from-brand-600 via-accent-purple to-accent-pink relative"></div>
 
         <div className="px-6 sm:px-10 pb-10 relative">
-          {/* Avatar Area */}
+          {/* Avatar & Photo Action Buttons */}
           <div className="flex flex-col sm:flex-row items-center sm:items-end justify-between -mt-16 mb-8 gap-4">
             <div className="relative group">
               <img
@@ -118,26 +160,45 @@ const ProfilePage = () => {
               />
               <button
                 type="button"
-                onClick={handleGenerateRandomAvatar}
-                title="Generate new random avatar"
-                className="absolute -bottom-2 -right-2 p-2 bg-slate-900 dark:bg-navy-950 text-white rounded-xl shadow-lg hover:bg-brand-600 transition-colors"
+                onClick={() => fileInputRef.current?.click()}
+                title="Upload photo from device"
+                className="absolute -bottom-2 -right-2 p-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl shadow-lg transition-transform active:scale-95 flex items-center justify-center"
               >
-                <RefreshCw className="w-4 h-4" />
+                <Camera className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center justify-center sm:justify-end gap-2.5">
+              {/* Direct Upload Button */}
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="px-4 py-2 text-xs font-bold text-white bg-gradient-to-r from-brand-600 to-accent-purple hover:from-brand-700 hover:to-purple-700 rounded-xl shadow-md transition-all active:scale-95 flex items-center gap-1.5"
+              >
+                <Upload className="w-3.5 h-3.5" />
+                <span>Upload Photo</span>
+              </button>
+
+              {/* Random Avatar */}
+              <button
+                type="button"
+                onClick={handleGenerateRandomAvatar}
+                className="px-3.5 py-2 text-xs font-bold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-navy-800 hover:bg-slate-200 rounded-xl transition-colors flex items-center gap-1.5"
+                title="Generate illustration avatar"
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+                <span>Random Avatar</span>
+              </button>
+
+              {/* Remove Photo */}
               <button
                 type="button"
                 onClick={handleRemovePhoto}
                 className="px-3.5 py-2 text-xs font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl border border-rose-200 dark:border-rose-800 transition-colors flex items-center gap-1.5"
               >
                 <Trash2 className="w-3.5 h-3.5" />
-                <span>Remove Photo</span>
+                <span>Remove</span>
               </button>
-              <div className="text-xs text-slate-400 dark:text-slate-500 font-semibold pl-2">
-                Joined {formatDate(user?.createdAt)}
-              </div>
             </div>
           </div>
 
@@ -175,19 +236,22 @@ const ProfilePage = () => {
               </div>
             </div>
 
-            {/* Profile Image URL */}
+            {/* Profile Image URL / Preview */}
             <div className="space-y-2">
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300">
-                Avatar / Custom Profile Image URL
+                Profile Image URL (or use Upload button above)
               </label>
-              <input
-                type="url"
-                name="profileImage"
-                value={formData.profileImage}
-                onChange={handleChange}
-                placeholder="https://images.unsplash.com/..."
-                className="w-full px-4 py-3.5 bg-slate-50 dark:bg-navy-900 border border-slate-200 dark:border-slate-700/80 rounded-2xl text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white dark:focus:bg-navy-950 transition-all"
-              />
+              <div className="relative">
+                <input
+                  type="text"
+                  name="profileImage"
+                  value={formData.profileImage.startsWith('data:') ? '(Uploaded Image Data Selected)' : formData.profileImage}
+                  onChange={handleChange}
+                  placeholder="https://images.unsplash.com/... or paste image link"
+                  className="w-full pl-11 pr-4 py-3.5 bg-slate-50 dark:bg-navy-900 border border-slate-200 dark:border-slate-700/80 rounded-2xl text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white dark:focus:bg-navy-950 transition-all"
+                />
+                <ImageIcon className="w-4 h-4 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2" />
+              </div>
             </div>
 
             {/* Biography */}

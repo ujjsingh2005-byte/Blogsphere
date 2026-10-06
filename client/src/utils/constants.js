@@ -78,8 +78,8 @@ export const SAMPLE_COVER_PRESETS = [
 
 export const DEMO_ACCOUNTS = [
   {
-    role: '👑 Chief Administrator (Admin Suite)',
-    email: 'admin@blogsphere.com',
+    role: '👑 Ujjwal Singh (Super Admin)',
+    email: 'ujjsingh203@gmail.com',
     password: 'password123'
   },
   {

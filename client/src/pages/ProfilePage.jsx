@@ -1,5 +1,20 @@
 import React, { useState } from 'react';
-import { User, Mail, Shield, Sparkles, Check, RefreshCw, Trash2, Camera } from 'lucide-react';
+import {
+  User,
+  Mail,
+  Shield,
+  Sparkles,
+  Check,
+  RefreshCw,
+  Trash2,
+  GraduationCap,
+  Briefcase,
+  Code2,
+  MapPin,
+  ExternalLink,
+  Layers,
+  Award
+} from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { formatDate } from '../utils/dateUtils';
@@ -73,18 +88,21 @@ const ProfilePage = () => {
     user?.profileImage ||
     `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(user?.name || 'User')}`;
 
+  const isUjjwal = user?.email === 'ujjsingh203@gmail.com' || user?.name?.toLowerCase().includes('ujjwal');
+
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8 animate-fade-in">
       <div className="space-y-1.5">
         <h1 className="text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-slate-100 font-display flex items-center gap-3">
           <User className="w-7 h-7 text-brand-600 dark:text-brand-400" />
-          <span>Account Settings & Profile</span>
+          <span>Account & Developer Profile</span>
         </h1>
         <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-          Manage your public author persona, biography, and credentials.
+          Manage your personal biography, credentials, and showcase engineering highlights.
         </p>
       </div>
 
+      {/* Profile Settings Card */}
       <div className="bg-white dark:bg-navy-850 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-sm overflow-hidden">
         {/* Profile Header Canvas */}
         <div className="h-36 bg-gradient-to-r from-brand-600 via-accent-purple to-accent-pink relative"></div>
@@ -176,7 +194,7 @@ const ProfilePage = () => {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300">
-                  Author Bio
+                  Author Biography
                 </label>
                 <span className="text-xs text-slate-400 dark:text-slate-500 font-semibold">
                   {formData.bio.length}/250
@@ -188,7 +206,7 @@ const ProfilePage = () => {
                 value={formData.bio}
                 onChange={handleChange}
                 maxLength={250}
-                placeholder="Share a short summary about your background, interests, or writing focus..."
+                placeholder="Share a short summary about your background, interests, or engineering focus..."
                 className="w-full p-4 bg-slate-50 dark:bg-navy-900 border border-slate-200 dark:border-slate-700/80 rounded-2xl text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white dark:focus:bg-navy-950 transition-all resize-none"
               />
             </div>
@@ -207,9 +225,6 @@ const ProfilePage = () => {
                 placeholder="Leave blank to keep your current password"
                 className="w-full px-4 py-3.5 bg-slate-50 dark:bg-navy-900 border border-slate-200 dark:border-slate-700/80 rounded-2xl text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white dark:focus:bg-navy-950 transition-all"
               />
-              <p className="text-[11px] text-slate-400 dark:text-slate-500">
-                Minimum 6 characters if you wish to reset your password.
-              </p>
             </div>
 
             {/* Submit Button */}
@@ -235,6 +250,113 @@ const ProfilePage = () => {
           </form>
         </div>
       </div>
+
+      {/* Developer Resume & Portfolio Showcase Card */}
+      {isUjjwal && (
+        <div className="bg-white dark:bg-navy-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
+          <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-brand-600 to-accent-purple text-white flex items-center justify-center shadow-md">
+                <Code2 className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white font-display">
+                  Developer Portfolio Highlights
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                  <MapPin className="w-3 h-3 text-rose-500" /> Lucknow, Uttar Pradesh, India
+                </p>
+              </div>
+            </div>
+            <span className="px-3 py-1 text-xs font-bold rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+              Verified Developer
+            </span>
+          </div>
+
+          {/* Education & Core Focus */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-navy-800/60 border border-slate-100 dark:border-slate-800 space-y-1.5">
+              <div className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                <GraduationCap className="w-4 h-4 text-brand-500" />
+                Education
+              </div>
+              <p className="text-sm font-extrabold text-slate-800 dark:text-slate-100">
+                B.Tech in Computer Science & Engineering
+              </p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Dr. A.P.J. Abdul Kalam Technical University (Sep 2023 – May 2027)
+              </p>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-navy-800/60 border border-slate-100 dark:border-slate-800 space-y-1.5">
+              <div className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                <Briefcase className="w-4 h-4 text-purple-500" />
+                Primary Engineering Focus
+              </div>
+              <p className="text-sm font-extrabold text-slate-800 dark:text-slate-100">
+                Full-Stack MERN, System Architecture & AI
+              </p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Scalable APIs, JWT RBAC, Cloud Integration & Realtime Vision
+              </p>
+            </div>
+          </div>
+
+          {/* Flagship Projects */}
+          <div className="space-y-3 pt-2">
+            <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+              <Layers className="w-4 h-4 text-amber-500" />
+              Flagship Built Projects
+            </h4>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {/* Project 1 */}
+              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-navy-800/50 border border-slate-100 dark:border-slate-800 flex flex-col justify-between">
+                <div>
+                  <h5 className="font-extrabold text-sm text-slate-900 dark:text-white">CourseHub</h5>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                    Scalable online learning platform with JWT RBAC, Cloudinary streaming & payment gateway.
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-1 mt-3">
+                  {['React', 'Node.js', 'MongoDB', 'Cloudinary'].map(t => (
+                    <span key={t} className="px-1.5 py-0.5 text-[9px] font-bold rounded bg-slate-200 dark:bg-navy-700 text-slate-700 dark:text-slate-300">{t}</span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Project 2 */}
+              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-navy-800/50 border border-slate-100 dark:border-slate-800 flex flex-col justify-between">
+                <div>
+                  <h5 className="font-extrabold text-sm text-slate-900 dark:text-white">Bharat Sign AI</h5>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                    Multimodal Indian Sign Language translation connecting spoken text, voice & gestures.
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-1 mt-3">
+                  {['React', 'FastAPI', 'MediaPipe', 'Supabase'].map(t => (
+                    <span key={t} className="px-1.5 py-0.5 text-[9px] font-bold rounded bg-slate-200 dark:bg-navy-700 text-slate-700 dark:text-slate-300">{t}</span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Project 3 */}
+              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-navy-800/50 border border-slate-100 dark:border-slate-800 flex flex-col justify-between">
+                <div>
+                  <h5 className="font-extrabold text-sm text-slate-900 dark:text-white">Smart Parking</h5>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                    Real-time slot allocation, booking and parking analytics management system.
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-1 mt-3">
+                  {['React', 'Node.js', 'Express', 'MongoDB'].map(t => (
+                    <span key={t} className="px-1.5 py-0.5 text-[9px] font-bold rounded bg-slate-200 dark:bg-navy-700 text-slate-700 dark:text-slate-300">{t}</span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

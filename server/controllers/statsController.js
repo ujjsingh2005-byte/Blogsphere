@@ -1,5 +1,6 @@
 import Post from '../models/Post.js';
 import Comment from '../models/Comment.js';
+import Category from '../models/Category.js';
 
 // @desc    Get dashboard metrics for authenticated user
 // @route   GET /api/stats/user
@@ -51,6 +52,36 @@ export const getUserStats = async (req, res, next) => {
         recentPosts,
         recentComments
       }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get public categories list with post counts
+// @route   GET /api/stats/categories
+// @access  Public
+export const getPublicCategories = async (req, res, next) => {
+  try {
+    const categories = await Category.find().sort({ name: 1 });
+    const counts = await Post.aggregate([
+      { $group: { _id: '$category', count: { $sum: 1 } } }
+    ]);
+    const countMap = {};
+    counts.forEach(c => { countMap[c._id] = c.count; });
+
+    const data = categories.map(cat => ({
+      _id: cat._id,
+      name: cat.name,
+      slug: cat.slug,
+      description: cat.description,
+      color: cat.color,
+      postCount: countMap[cat.name] || 0
+    }));
+
+    res.json({
+      success: true,
+      data
     });
   } catch (error) {
     next(error);

@@ -3,6 +3,7 @@ import { Routes, Route } from 'react-router-dom';
 import Navbar from './components/common/Navbar';
 import Footer from './components/common/Footer';
 import ProtectedRoute from './components/common/ProtectedRoute';
+import AdminRoute from './components/common/AdminRoute';
 
 // Pages
 import HomePage from './pages/HomePage';
@@ -15,6 +16,15 @@ import ProfilePage from './pages/ProfilePage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import NotFoundPage from './pages/NotFoundPage';
+
+// Admin Suite Pages
+import AdminLayout from './pages/admin/AdminLayout';
+import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminUsers from './pages/admin/AdminUsers';
+import AdminPosts from './pages/admin/AdminPosts';
+import AdminComments from './pages/admin/AdminComments';
+import AdminCategories from './pages/admin/AdminCategories';
+import AdminReports from './pages/admin/AdminReports';
 
 function App() {
   return (
@@ -29,7 +39,7 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
 
-          {/* Protected Routes */}
+          {/* User Protected Routes */}
           <Route
             path="/dashboard"
             element={
@@ -70,6 +80,23 @@ function App() {
               </ProtectedRoute>
             }
           />
+
+          {/* Admin Protected Routes & Suite */}
+          <Route
+            path="/admin"
+            element={
+              <AdminRoute>
+                <AdminLayout />
+              </AdminRoute>
+            }
+          >
+            <Route index element={<AdminDashboard />} />
+            <Route path="users" element={<AdminUsers />} />
+            <Route path="posts" element={<AdminPosts />} />
+            <Route path="comments" element={<AdminComments />} />
+            <Route path="categories" element={<AdminCategories />} />
+            <Route path="reports" element={<AdminReports />} />
+          </Route>
 
           {/* Catch-all 404 Route */}
           <Route path="/404" element={<NotFoundPage />} />

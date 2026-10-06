@@ -13,7 +13,8 @@ import {
   Sparkles,
   BookOpen,
   ChevronDown,
-  Layers
+  Layers,
+  ShieldCheck
 } from 'lucide-react';
 
 const Navbar = () => {
@@ -42,6 +43,7 @@ const Navbar = () => {
   };
 
   const closeMobile = () => setMobileMenuOpen(false);
+  const isAdmin = user?.role === 'admin';
 
   return (
     <header
@@ -107,6 +109,21 @@ const Navbar = () => {
                 >
                   My Stories
                 </Link>
+
+                {/* Admin Quick Link */}
+                {isAdmin && (
+                  <Link
+                    to="/admin"
+                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-extrabold transition-all ${
+                      location.pathname.startsWith('/admin')
+                        ? 'bg-amber-500 text-white shadow-md shadow-amber-500/20'
+                        : 'bg-amber-100 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 hover:bg-amber-200'
+                    }`}
+                  >
+                    <ShieldCheck className="w-3.5 h-3.5" />
+                    Admin Panel
+                  </Link>
+                )}
               </>
             )}
           </nav>
@@ -140,7 +157,9 @@ const Navbar = () => {
                         )}`
                       }
                       alt={user?.name}
-                      className="w-9 h-9 rounded-xl object-cover ring-2 ring-brand-500/40"
+                      className={`w-9 h-9 rounded-xl object-cover ring-2 ${
+                        isAdmin ? 'ring-amber-400' : 'ring-brand-500/40'
+                      }`}
                     />
                     <span className="text-sm font-bold text-slate-700 dark:text-slate-200 max-w-[120px] truncate">
                       {user?.name}
@@ -150,13 +169,31 @@ const Navbar = () => {
 
                   {userDropdownOpen && (
                     <div
-                      className="absolute right-0 mt-2 w-60 bg-white dark:bg-navy-800 rounded-3xl shadow-2xl border border-slate-100 dark:border-slate-700 py-2 animate-fade-in z-50"
+                      className="absolute right-0 mt-2 w-64 bg-white dark:bg-navy-800 rounded-3xl shadow-2xl border border-slate-100 dark:border-slate-700 py-2 animate-fade-in z-50"
                       onMouseLeave={() => setUserDropdownOpen(false)}
                     >
                       <div className="px-5 py-3.5 border-b border-slate-100 dark:border-slate-700/60">
-                        <p className="text-[11px] text-slate-400 font-semibold uppercase tracking-wider">Signed in as</p>
-                        <p className="text-sm font-bold text-slate-800 dark:text-slate-100 truncate">{user?.email}</p>
+                        <div className="flex items-center justify-between">
+                          <p className="text-[11px] text-slate-400 font-semibold uppercase tracking-wider">Signed in as</p>
+                          {isAdmin && (
+                            <span className="px-2 py-0.5 text-[10px] font-extrabold bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 rounded-md uppercase">
+                              👑 Admin
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-sm font-bold text-slate-800 dark:text-slate-100 truncate mt-0.5">{user?.email}</p>
                       </div>
+
+                      {isAdmin && (
+                        <Link
+                          to="/admin"
+                          onClick={() => setUserDropdownOpen(false)}
+                          className="flex items-center gap-3 px-5 py-2.5 text-sm font-bold text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/30 transition-colors"
+                        >
+                          <ShieldCheck className="w-4 h-4 text-amber-500" />
+                          Admin Command Center
+                        </Link>
+                      )}
 
                       <Link
                         to="/dashboard"
@@ -251,13 +288,32 @@ const Navbar = () => {
                     )}`
                   }
                   alt={user?.name}
-                  className="w-11 h-11 rounded-xl object-cover ring-2 ring-brand-500/40"
+                  className={`w-11 h-11 rounded-xl object-cover ring-2 ${
+                    isAdmin ? 'ring-amber-400' : 'ring-brand-500/40'
+                  }`}
                 />
                 <div className="truncate">
-                  <p className="text-sm font-bold text-slate-800 dark:text-slate-100 truncate">{user?.name}</p>
+                  <div className="flex items-center gap-1.5">
+                    <p className="text-sm font-bold text-slate-800 dark:text-slate-100 truncate">{user?.name}</p>
+                    {isAdmin && (
+                      <span className="px-1.5 py-0.2 text-[9px] font-extrabold bg-amber-100 text-amber-700 rounded">
+                        Admin
+                      </span>
+                    )}
+                  </div>
                   <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{user?.email}</p>
                 </div>
               </div>
+
+              {isAdmin && (
+                <Link
+                  to="/admin"
+                  onClick={closeMobile}
+                  className="block px-4 py-2.5 rounded-xl text-sm font-extrabold bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300"
+                >
+                  👑 Admin Command Center
+                </Link>
+              )}
 
               <Link
                 to="/"

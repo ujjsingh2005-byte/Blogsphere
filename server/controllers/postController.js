@@ -48,7 +48,7 @@ export const getPosts = async (req, res, next) => {
 
     const total = await Post.countDocuments(query);
     const posts = await Post.find(query)
-      .populate('author', 'name email profileImage bio')
+      .populate('author', 'name email profileImage bio role')
       .populate('commentsCount')
       .sort(sortOption)
       .skip(startIndex)
@@ -77,7 +77,7 @@ export const getPosts = async (req, res, next) => {
 export const getPostById = async (req, res, next) => {
   try {
     const post = await Post.findById(req.params.id)
-      .populate('author', 'name email profileImage bio')
+      .populate('author', 'name email profileImage bio role')
       .populate('commentsCount');
 
     if (!post) {
@@ -122,7 +122,7 @@ export const createPost = async (req, res, next) => {
       readTime
     });
 
-    const populatedPost = await Post.findById(post._id).populate('author', 'name email profileImage bio');
+    const populatedPost = await Post.findById(post._id).populate('author', 'name email profileImage bio role');
 
     res.status(201).json({
       success: true,
@@ -136,7 +136,7 @@ export const createPost = async (req, res, next) => {
 
 // @desc    Update a blog post
 // @route   PUT /api/posts/:id
-// @access  Private (Owner only)
+// @access  Private (Owner or Admin)
 export const updatePost = async (req, res, next) => {
   try {
     const post = await Post.findById(req.params.id);
@@ -148,8 +148,11 @@ export const updatePost = async (req, res, next) => {
       });
     }
 
-    // Ownership check
-    if (post.author.toString() !== req.user._id.toString()) {
+    // Ownership or Admin check
+    const isOwner = post.author.toString() === req.user._id.toString();
+    const isAdmin = req.user.role === 'admin';
+
+    if (!isOwner && !isAdmin) {
       return res.status(403).json({
         success: false,
         message: 'Unauthorized: You are not allowed to edit another author’s post'
@@ -165,7 +168,7 @@ export const updatePost = async (req, res, next) => {
     if (content) post.readTime = calculateReadTime(post.content);
 
     const updatedPost = await post.save();
-    const populated = await Post.findById(updatedPost._id).populate('author', 'name email profileImage bio');
+    const populated = await Post.findById(updatedPost._id).populate('author', 'name email profileImage bio role');
 
     res.json({
       success: true,
@@ -179,7 +182,7 @@ export const updatePost = async (req, res, next) => {
 
 // @desc    Delete a blog post and its associated comments
 // @route   DELETE /api/posts/:id
-// @access  Private (Owner only)
+// @access  Private (Owner or Admin)
 export const deletePost = async (req, res, next) => {
   try {
     const post = await Post.findById(req.params.id);
@@ -191,8 +194,11 @@ export const deletePost = async (req, res, next) => {
       });
     }
 
-    // Ownership check
-    if (post.author.toString() !== req.user._id.toString()) {
+    // Ownership or Admin check
+    const isOwner = post.author.toString() === req.user._id.toString();
+    const isAdmin = req.user.role === 'admin';
+
+    if (!isOwner && !isAdmin) {
       return res.status(403).json({
         success: false,
         message: 'Unauthorized: You are not allowed to delete another author’s post'

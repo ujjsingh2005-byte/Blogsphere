@@ -19,6 +19,14 @@ export const protect = async (req, res, next) => {
           message: 'User no longer exists. Please sign in again.'
         });
       }
+
+      if (req.user.isBlocked) {
+        return res.status(403).json({
+          success: false,
+          message: 'Your account has been suspended by an administrator.'
+        });
+      }
+
       return next();
     } catch (error) {
       console.error('[Auth Error]', error.message);
@@ -35,4 +43,15 @@ export const protect = async (req, res, next) => {
       message: 'Not authorized, no authentication token provided'
     });
   }
+};
+
+// Middleware to restrict route to Admins only
+export const adminOnly = (req, res, next) => {
+  if (req.user && req.user.role === 'admin') {
+    return next();
+  }
+  return res.status(403).json({
+    success: false,
+    message: 'Access denied: Administrator privileges required.'
+  });
 };

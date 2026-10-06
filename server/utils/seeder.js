@@ -1,24 +1,38 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
-import bcrypt from 'bcryptjs';
 import User from '../models/User.js';
 import Post from '../models/Post.js';
 import Comment from '../models/Comment.js';
+import Category from '../models/Category.js';
+import Report from '../models/Report.js';
 
 dotenv.config();
 
 const usersData = [
   {
+    name: 'Chief Administrator',
+    email: 'admin@blogsphere.com',
+    password: 'password123',
+    role: 'admin',
+    isBlocked: false,
+    profileImage: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+    bio: 'Platform Overseer and Lead Administrator. Managing content safety, site categories, and user integrity.'
+  },
+  {
     name: 'Alex Rivera',
     email: 'alex@blogsphere.com',
     password: 'password123',
-    profileImage: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+    role: 'user',
+    isBlocked: false,
+    profileImage: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
     bio: 'Lead Architect & Tech Evangelist. Writing about scalable systems, distributed nodes, and modern web frameworks.'
   },
   {
     name: 'Elena Rostova',
     email: 'elena@blogsphere.com',
     password: 'password123',
+    role: 'user',
+    isBlocked: false,
     profileImage: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&q=80',
     bio: 'AI researcher and Machine Learning engineer. Passionate about LLMs, neural networks, and ethical artificial intelligence.'
   },
@@ -26,15 +40,58 @@ const usersData = [
     name: 'Marcus Chen',
     email: 'marcus@blogsphere.com',
     password: 'password123',
-    profileImage: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
+    role: 'user',
+    isBlocked: false,
+    profileImage: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80',
     bio: 'Senior Frontend Developer & UI/UX enthusiast. Building joyful web applications with React, Tailwind, and WebGL.'
   },
   {
     name: 'Sarah Jenkins',
     email: 'sarah@blogsphere.com',
     password: 'password123',
+    role: 'user',
+    isBlocked: false,
     profileImage: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&q=80',
     bio: 'Career coach, writer, and tech community advocate. Helping engineers navigate tech transitions and remote leadership.'
+  }
+];
+
+const categoriesData = [
+  {
+    name: 'Technology',
+    slug: 'technology',
+    description: 'Hardware, infrastructure, cloud architecture, and tech trends.',
+    color: 'from-blue-500 to-cyan-500'
+  },
+  {
+    name: 'Web Development',
+    slug: 'web-development',
+    description: 'Frontend, backend, fullstack development, frameworks, and APIs.',
+    color: 'from-violet-500 to-purple-600'
+  },
+  {
+    name: 'AI',
+    slug: 'ai',
+    description: 'Artificial intelligence, machine learning, deep learning, and LLMs.',
+    color: 'from-emerald-500 to-teal-600'
+  },
+  {
+    name: 'Programming',
+    slug: 'programming',
+    description: 'Clean code principles, algorithms, data structures, and best practices.',
+    color: 'from-amber-500 to-orange-600'
+  },
+  {
+    name: 'Lifestyle',
+    slug: 'lifestyle',
+    description: 'Remote work, productivity, mental health, and work-life balance.',
+    color: 'from-rose-500 to-pink-600'
+  },
+  {
+    name: 'Career',
+    slug: 'career',
+    description: 'Engineering levels, mentorship, salary negotiations, and leadership.',
+    color: 'from-indigo-500 to-blue-600'
   }
 ];
 
@@ -154,7 +211,13 @@ const seedDB = async () => {
     await User.deleteMany({});
     await Post.deleteMany({});
     await Comment.deleteMany({});
+    await Category.deleteMany({});
+    await Report.deleteMany({});
     console.log('[Seeder] Cleared existing data');
+
+    // Create Categories
+    const createdCategories = await Category.insertMany(categoriesData);
+    console.log(`[Seeder] Created ${createdCategories.length} categories`);
 
     // Create users
     const createdUsers = [];
@@ -162,12 +225,14 @@ const seedDB = async () => {
       const user = await User.create(userData);
       createdUsers.push(user);
     }
-    console.log(`[Seeder] Created ${createdUsers.length} users`);
+    console.log(`[Seeder] Created ${createdUsers.length} users (including 1 Administrator)`);
 
     // Create posts
     const createdPosts = [];
+    // User authors (skip admin as post author for realism, use user accounts)
+    const authorUsers = createdUsers.filter(u => u.role === 'user');
     for (let i = 0; i < postsData.length; i++) {
-      const author = createdUsers[i % createdUsers.length];
+      const author = authorUsers[i % authorUsers.length];
       const post = await Post.create({
         ...postsData[i],
         author: author._id,
@@ -182,7 +247,7 @@ const seedDB = async () => {
     for (let i = 0; i < createdPosts.length; i++) {
       const post = createdPosts[i];
       for (let j = 0; j < 2; j++) {
-        const commenter = createdUsers[(i + j + 1) % createdUsers.length];
+        const commenter = createdUsers[(i + j) % createdUsers.length];
         await Comment.create({
           content: sampleComments[(i + j) % sampleComments.length],
           postId: post._id,
@@ -193,12 +258,39 @@ const seedDB = async () => {
     }
     console.log(`[Seeder] Created ${commentCount} comments`);
 
+    // Create Sample Moderation Reports
+    const adminUser = createdUsers.find(u => u.role === 'admin');
+    const normalUser = createdUsers.find(u => u.role === 'user');
+
+    await Report.create({
+      reporter: normalUser._id,
+      targetType: 'post',
+      targetId: createdPosts[0]._id.toString(),
+      targetTitle: createdPosts[0].title,
+      reason: 'Spam',
+      details: 'Please verify the external reference links in this post.',
+      status: 'pending'
+    });
+
+    await Report.create({
+      reporter: normalUser._id,
+      targetType: 'comment',
+      targetId: createdPosts[1]._id.toString(),
+      targetTitle: 'Great insights on React 19...',
+      reason: 'Inappropriate Content',
+      details: 'Flagged for moderation check.',
+      status: 'resolved',
+      adminNotes: 'Reviewed content, verified compliant with community standards.'
+    });
+
+    console.log('[Seeder] Created sample moderation reports');
+
     console.log('\n========================================');
     console.log(' SEEDING COMPLETED ON MONGODB ATLAS!');
-    console.log(' Demo Accounts:');
-    createdUsers.forEach(u => {
-      console.log(` - Email: ${u.email} | Password: password123 | Name: ${u.name}`);
-    });
+    console.log(' Accounts for testing:');
+    console.log(' 👑 ADMIN: admin@blogsphere.com | password123 | Chief Administrator');
+    console.log(' 👤 USER:  alex@blogsphere.com  | password123 | Alex Rivera');
+    console.log(' 👤 USER:  elena@blogsphere.com | password123 | Elena Rostova');
     console.log('========================================\n');
 
     process.exit(0);

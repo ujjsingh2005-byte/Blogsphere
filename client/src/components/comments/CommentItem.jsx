@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Edit2, Trash2, Check, X, Heart } from 'lucide-react';
+import { Edit2, Trash2, Check, X, Heart, Flag, ShieldAlert } from 'lucide-react';
 import { formatRelativeTime } from '../../utils/dateUtils';
 import { useAuth } from '../../context/AuthContext';
 import ConfirmModal from '../common/ConfirmModal';
+import ReportModal from '../common/ReportModal';
 
 const CommentItem = ({ comment, onUpdate, onDelete }) => {
   const { user } = useAuth();
@@ -10,12 +11,14 @@ const CommentItem = ({ comment, onUpdate, onDelete }) => {
   const [editContent, setEditContent] = useState(comment.content);
   const [isUpdating, setIsUpdating] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(Math.floor(Math.random() * 4));
 
   const authorId = comment.author?._id || comment.author;
   const isOwner = user && authorId && (user._id === authorId || user.id === authorId);
+  const isAdmin = user?.role === 'admin';
 
   const authorName = comment.author?.name || 'Anonymous User';
   const authorImage =
@@ -75,9 +78,14 @@ const CommentItem = ({ comment, onUpdate, onDelete }) => {
           <div>
             <div className="flex items-center gap-2">
               <span className="text-sm font-bold text-slate-900 dark:text-slate-100">{authorName}</span>
+              {comment.author?.role === 'admin' && (
+                <span className="px-1.5 py-0.5 rounded-md text-[9px] font-black bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400">
+                  Admin
+                </span>
+              )}
               {isOwner && (
                 <span className="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-brand-50 dark:bg-brand-950/60 text-brand-600 dark:text-brand-400 border border-brand-200 dark:border-brand-800">
-                  You (Author)
+                  You
                 </span>
               )}
             </div>
@@ -90,9 +98,9 @@ const CommentItem = ({ comment, onUpdate, onDelete }) => {
           </div>
         </div>
 
-        {/* Owner Action Buttons */}
-        {isOwner && !isEditing && (
-          <div className="flex items-center gap-1.5">
+        {/* Action Buttons */}
+        <div className="flex items-center gap-1.5">
+          {isOwner && !isEditing && (
             <button
               onClick={() => setIsEditing(true)}
               className="p-1.5 text-slate-400 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
@@ -100,15 +108,32 @@ const CommentItem = ({ comment, onUpdate, onDelete }) => {
             >
               <Edit2 className="w-4 h-4" />
             </button>
+          )}
+
+          {(isOwner || isAdmin) && !isEditing && (
             <button
               onClick={() => setShowDeleteModal(true)}
-              className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-xl transition-colors"
-              title="Delete comment"
+              className={`p-1.5 rounded-xl transition-colors ${
+                isAdmin && !isOwner
+                  ? 'text-amber-600 dark:text-amber-400 hover:bg-rose-50 hover:text-rose-600'
+                  : 'text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30'
+              }`}
+              title={isAdmin && !isOwner ? 'Admin: Remove comment' : 'Delete comment'}
             >
               <Trash2 className="w-4 h-4" />
             </button>
-          </div>
-        )}
+          )}
+
+          {!isOwner && (
+            <button
+              onClick={() => setShowReportModal(true)}
+              className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-xl transition-colors"
+              title="Report comment"
+            >
+              <Flag className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Comment Body / Inline Edit */}
@@ -174,12 +199,25 @@ const CommentItem = ({ comment, onUpdate, onDelete }) => {
       {/* Delete Confirmation Modal */}
       <ConfirmModal
         isOpen={showDeleteModal}
-        title="Delete Comment"
-        message="Are you sure you want to delete this comment? This cannot be undone."
+        title={isAdmin && !isOwner ? 'Admin: Delete Comment' : 'Delete Comment'}
+        message={
+          isAdmin && !isOwner
+            ? `Are you sure you want to remove this comment as an administrator?`
+            : 'Are you sure you want to delete your comment? This cannot be undone.'
+        }
         confirmText="Delete Comment"
         isLoading={isDeleting}
         onConfirm={handleDeleteConfirm}
         onCancel={() => setShowDeleteModal(false)}
+      />
+
+      {/* Report Modal */}
+      <ReportModal
+        isOpen={showReportModal}
+        onClose={() => setShowReportModal(false)}
+        targetType="comment"
+        targetId={comment._id}
+        targetTitle={`Comment by ${authorName}`}
       />
     </div>
   );

@@ -35,7 +35,9 @@ export const registerUser = async (req, res, next) => {
       email: email.toLowerCase(),
       password,
       profileImage: profileImage || '',
-      bio: bio || ''
+      bio: bio || '',
+      role: 'user',
+      isBlocked: false
     });
 
     res.status(201).json({
@@ -45,6 +47,8 @@ export const registerUser = async (req, res, next) => {
         _id: user._id,
         name: user.name,
         email: user.email,
+        role: user.role,
+        isBlocked: user.isBlocked,
         profileImage: user.profileImage,
         bio: user.bio,
         createdAt: user.createdAt,
@@ -78,6 +82,13 @@ export const loginUser = async (req, res, next) => {
       });
     }
 
+    if (user.isBlocked) {
+      return res.status(403).json({
+        success: false,
+        message: 'Your account has been suspended by an administrator.'
+      });
+    }
+
     const isMatch = await user.matchPassword(password);
     if (!isMatch) {
       return res.status(401).json({
@@ -93,6 +104,8 @@ export const loginUser = async (req, res, next) => {
         _id: user._id,
         name: user.name,
         email: user.email,
+        role: user.role || 'user',
+        isBlocked: user.isBlocked || false,
         profileImage: user.profileImage,
         bio: user.bio,
         createdAt: user.createdAt,
@@ -163,6 +176,8 @@ export const updateProfile = async (req, res, next) => {
         _id: updatedUser._id,
         name: updatedUser.name,
         email: updatedUser.email,
+        role: updatedUser.role,
+        isBlocked: updatedUser.isBlocked,
         profileImage: updatedUser.profileImage,
         bio: updatedUser.bio,
         createdAt: updatedUser.createdAt,

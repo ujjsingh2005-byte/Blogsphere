@@ -1,6 +1,25 @@
-# 🌟 BlogSphere — World-Class Full-Stack Blog Platform with Comments
+# 🌟 BlogSphere — World-Class Full-Stack Blog Platform with Comments & Admin Suite
 
-BlogSphere is an enterprise-grade, high-performance, full-stack blogging platform and digital magazine built with **React 18, Vite, Tailwind CSS, Node.js, Express, and MongoDB**.
+BlogSphere is an enterprise-grade, high-performance, full-stack blogging platform and digital magazine built with **React 18, Vite, Tailwind CSS, Node.js, Express, and MongoDB Atlas**.
+
+---
+
+## 👤 User vs 👑 Admin Role Architecture
+
+| Feature | 👤 User (Normal) | 👑 Admin (Platform Overseer) |
+| :--- | :---: | :---: |
+| **Register & Login** | ✅ | ✅ (Pre-seeded & managed) |
+| **View & Search Stories** | ✅ | ✅ |
+| **Create & Publish Article** | ✅ | ✅ |
+| **Edit / Delete Own Article** | ✅ | ✅ |
+| **Edit / Delete Another User's Article** | ❌ *(Protected)* | ✅ *(Administrative Override)* |
+| **Post / Edit / Delete Own Comments** | ✅ | ✅ |
+| **Delete Inappropriate Comments by Others** | ❌ *(Protected)* | ✅ *(Administrative Override)* |
+| **Report Abuse / Spam** | ✅ *(Submits to Queue)* | ✅ *(Resolves & Dismisses)* |
+| **Admin Command Center (`/admin`)** | ❌ *(403 Forbidden)* | ✅ *(Full Access)* |
+| **User Directory & Account Suspension** | ❌ | ✅ *(Search, Block/Unblock, Role Change, Delete)* |
+| **Dynamic Category Management** | ❌ | ✅ *(Create, Edit, Delete, Live Post Counts)* |
+| **Platform Analytics & Health Metrics** | ❌ | ✅ *(Total Users, Posts, Comments, Reports)* |
 
 ---
 
@@ -18,37 +37,44 @@ BlogSphere combines the sleek aesthetic of a **Premium SaaS**, the visual storyt
 
 ## 🚀 Key Features
 
-### 1. 🌙 Seamless Dark & Light Mode System
+### 1. 👑 Admin Command Center (`/admin`)
+- **Platform Analytics**: Comprehensive KPIs tracking total users, active vs. suspended counts, total articles, total comments, and unresolved abuse reports.
+- **User Management**: Instant search, status suspension toggle (block/unblock), role switcher (User ↔ Admin), and user deletion.
+- **Content Moderation**: Global article table and comment stream with direct moderation actions.
+- **Dynamic Categories**: Live category creation, color theme assignment, and automatic post reassignment upon deletion.
+- **Abuse Reports Queue**: Community-driven reporting system with reason tags, resolution workflow, and admin notes.
+
+### 2. 🌙 Seamless Dark & Light Mode System
 - One-click instant theme toggle (`Sun` / `Moon` animated icons) with system preference detection and `localStorage` persistence.
 - Complete dark-theme styling across all cards, modals, tables, navbar, and article typography.
 
-### 2. 🌌 Extraordinary Hero Section
+### 3. 🌌 Extraordinary Hero Section
 - Animated deep mesh gradient blobs with floating community highlight badges (*100% Open Access*, *Active Creators*, *Zero Paywalls*).
 - Dynamic headline with multi-color gradient typography: *"Share Your Ideas With The World."*
 
-### 3. 🛡️ Enterprise Authentication & Ownership Authorization
+### 4. 🛡️ Enterprise Authentication & Role Guards
 - **JWT (JSON Web Token)** authentication with 7-day expiration.
 - Password hashing with **`bcryptjs`** (salt rounds: 10, excluded from query results via `select: false`).
-- Automatic token injection via **Axios Request Interceptors**.
-- Strict resource ownership authorization: users can **only** edit/delete their own articles and comments (returns HTTP 403 otherwise).
+- **Role-Based Guards**: Protected routes for both general creators (`ProtectedRoute.jsx`) and administrators (`AdminRoute.jsx`).
+- **Account Suspension Enforcement**: Suspended users are immediately blocked from logging in and accessing APIs.
 - **1-Click Instant Demo Accounts** on the Sign In page for rapid reviewer testing.
 
-### 4. 📝 Editorial Publishing & Blog Discovery
+### 5. 📝 Editorial Publishing & Blog Discovery
 - **Full Article CRUD**: Create, Read, Update, and Delete articles with live cover preview and curated presets.
 - **Server-Side Search**: Search across titles, content, authors, and category tags.
-- **Category Filter Pills Ribbon**: Technology, Programming, AI, Web Development, Education, Career, Lifestyle, and Other.
-- **Reading Time Estimation**: Dynamic calculation based on word count.
+- **Category Filter Pills Ribbon**: Technology, Programming, AI, Web Development, Lifestyle, Career, and more.
+- **Reading Time Estimation**: Dynamic calculation based on word count (200 wpm).
 - **Server-Side Pagination**: Clean page numbering with next/previous controls.
 - **Reading Progress Bar**: Interactive top progress bar tracking article scroll depth.
 - **Interactive Share & Like Reactions**: Share to X/Twitter, LinkedIn, Copy Link, and heart likes.
 
-### 5. 💬 Interactive Comment Engine
+### 6. 💬 Interactive Comment Engine
 - Post comments on any article with character counter.
 - Inline edit and delete capabilities for comment owners.
-- Custom styled confirmation modals preventing accidental deletions.
-- Guest user prompts encouraging sign-in to join the conversation.
+- Flag / Report button allowing users to report inappropriate comments to the moderation queue.
+- Administrative removal capabilities for any inappropriate comment.
 
-### 6. 📊 Author Analytics & Dashboard
+### 7. 📊 Author Analytics & Dashboard
 - **SaaS Metric Cards**: Total Articles, Comments Received, Reading Minutes Generated, Comments Written.
 - **Publication Management Table**: Direct View, Edit, and Delete action buttons.
 - **Recent Audience Feedback**: Live feedback stream on user's stories.
@@ -59,7 +85,7 @@ BlogSphere combines the sleek aesthetic of a **Premium SaaS**, the visual storyt
 
 - **Frontend**: React 18, Vite, Tailwind CSS, Lucide React, Axios, React Router v6
 - **Backend**: Node.js, Express.js, JSON Web Tokens (`jsonwebtoken`), `bcryptjs`, `cors`, `dotenv`
-- **Database**: MongoDB & Mongoose ODM (with compound, full-text indexes and virtual populate)
+- **Database**: MongoDB Atlas & Mongoose ODM (with compound, full-text indexes and virtual populate)
 
 ---
 
@@ -67,7 +93,7 @@ BlogSphere combines the sleek aesthetic of a **Premium SaaS**, the visual storyt
 
 ```
 Big platform with comments/
-├── PRD.md                         # Product Requirements Document
+├── PRD.md                         # Product Requirements Document (with RBAC specs)
 ├── TRD.md                         # Technical Requirements Document
 ├── TDR.md                         # Technical Design Requirements Document
 ├── README.md                      # Comprehensive Setup & API Reference
@@ -75,21 +101,22 @@ Big platform with comments/
 │
 ├── server/                        # Backend REST API
 │   ├── config/db.js               # MongoDB Mongoose connection manager
-│   ├── models/                    # User, Post, Comment Mongoose schemas
-│   ├── controllers/               # Auth, Post, Comment, User, and Stats controllers
-│   ├── routes/                    # Express REST route definitions
-│   ├── middleware/                # JWT Auth, Input Validation, Centralized Error Handling
-│   └── utils/seeder.js            # Realistic database seeder
+│   ├── models/                    # User (role, isBlocked), Post, Comment, Category, Report
+│   ├── controllers/               # Auth, Post, Comment, User, Stats, Admin, and Report controllers
+│   ├── routes/                    # Auth, Post, Comment, User, Stats, Admin, and Report routes
+│   ├── middleware/                # JWT Auth, adminOnly guard, Centralized Error Handling
+│   └── utils/seeder.js            # Realistic database seeder (with Admin & Category seeds)
 │
 └── client/                        # React 18 SPA (Vite)
     ├── src/
     │   ├── context/               # AuthContext, ThemeContext, ToastContext
-    │   ├── hooks/                 # useAuth custom hook
-    │   ├── services/              # api.js, authService, postService, commentService, userService
-    │   ├── components/common/     # Navbar, Footer, ThemeToggle, ReadingProgressBar, BackToTop, Modal, SkeletonLoader
+    │   ├── services/              # api.js, authService, postService, commentService, adminService, reportService
+    │   ├── components/common/     # Navbar, Footer, ThemeToggle, AdminRoute, ProtectedRoute, ReportModal, ConfirmModal
     │   ├── components/blog/       # BlogCard, CategoryBadge, FeaturedPost, SearchFilterBar
     │   ├── components/comments/   # CommentSection, CommentItem, CommentForm
-    │   └── pages/                 # Home, BlogDetails, CreatePost, EditPost, Dashboard, MyPosts, Profile, Login, Register, NotFound
+    │   └── pages/
+    │       ├── admin/             # AdminLayout, AdminDashboard, AdminUsers, AdminPosts, AdminComments, AdminCategories, AdminReports
+    │       └── ...                # Home, BlogDetails, CreatePost, EditPost, Dashboard, MyPosts, Profile, Login, Register, NotFound
     └── vite.config.js             # Vite configuration with API proxy
 ```
 
@@ -99,30 +126,28 @@ Big platform with comments/
 
 ### 1. Prerequisites
 - Node.js (v18+)
-- MongoDB (Running on `mongodb://127.0.0.1:27017` or configured via `.env`)
+- MongoDB Atlas connection URI configured in `server/.env`
 
 ### 2. Seed Database
 ```bash
 npm run seed
 ```
 
-### 3. Start Backend Server (Port 5000)
+### 3. Run Application
 ```bash
-npm run server:dev
+npm run dev
 ```
-
-### 4. Start Frontend Client (Port 5173)
-```bash
-npm run client
-```
+* Backend API: `http://localhost:5000`
+* Frontend App: `http://localhost:5173`
 
 ---
 
 ## 🔑 Pre-Seeded Demo Accounts
 
-| Name | Role | Email | Password |
-| :--- | :--- | :--- | :--- |
-| **Alex Rivera** | Lead Architect | `alex@blogsphere.com` | `password123` |
-| **Elena Rostova** | AI Researcher | `elena@blogsphere.com` | `password123` |
-| **Marcus Chen** | Senior Frontend | `marcus@blogsphere.com` | `password123` |
-| **Sarah Jenkins** | Career Coach | `sarah@blogsphere.com` | `password123` |
+| Role | Name | Email | Password | Permissions |
+| :--- | :--- | :--- | :--- | :--- |
+| 👑 **Administrator** | Chief Administrator | `admin@blogsphere.com` | `password123` | Full Platform & Content Control |
+| 👤 **User (Author)** | Alex Rivera | `alex@blogsphere.com` | `password123` | Create, Edit, Comment, Report |
+| 👤 **User (Author)** | Elena Rostova | `elena@blogsphere.com` | `password123` | Create, Edit, Comment, Report |
+| 👤 **User (Author)** | Marcus Chen | `marcus@blogsphere.com` | `password123` | Create, Edit, Comment, Report |
+| 👤 **User (Author)** | Sarah Jenkins | `sarah@blogsphere.com` | `password123` | Create, Edit, Comment, Report |

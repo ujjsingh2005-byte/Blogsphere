@@ -13,7 +13,10 @@ import {
   Heart,
   Twitter,
   Linkedin,
-  Sparkles
+  Sparkles,
+  Flag,
+  ShieldAlert,
+  ShieldCheck
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -21,6 +24,7 @@ import api from '../services/api';
 import CategoryBadge from '../components/blog/CategoryBadge';
 import CommentSection from '../components/comments/CommentSection';
 import ConfirmModal from '../components/common/ConfirmModal';
+import ReportModal from '../components/common/ReportModal';
 import { BlogDetailSkeleton } from '../components/common/SkeletonLoader';
 import ReadingProgressBar from '../components/common/ReadingProgressBar';
 import BackToTop from '../components/common/BackToTop';
@@ -29,12 +33,13 @@ import { formatDate } from '../utils/dateUtils';
 const BlogDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const { toastSuccess, toastError, toastInfo } = useToast();
 
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [copied, setCopied] = useState(false);
   const [liked, setLiked] = useState(false);
@@ -59,17 +64,18 @@ const BlogDetailPage = () => {
     if (id) {
       fetchPost();
     }
-  }, [id, navigate]);
+  }, [id, navigate, toastError]);
 
   const authorId = post?.author?._id || post?.author;
   const isOwner = user && authorId && (user._id === authorId || user.id === authorId);
+  const isAdmin = user?.role === 'admin';
 
   const handleDeletePost = async () => {
     try {
       setDeleting(true);
       const res = await api.delete(`/posts/${id}`);
       if (res.data.success) {
-        toastSuccess('Blog post deleted successfully');
+        toastSuccess(isAdmin && !isOwner ? 'Article deleted by administrator' : 'Blog post deleted successfully');
         setShowDeleteModal(false);
         navigate('/');
       }
@@ -126,8 +132,36 @@ const BlogDetailPage = () => {
   return (
     <>
       <ReadingProgressBar />
-      <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
-        {/* Navigation Back */}
+      <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+        {/* Admin Moderation Alert Banner */}
+        {isAdmin && (
+          <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-amber-800 dark:text-amber-300 shadow-sm">
+            <div className="flex items-center gap-2.5">
+              <ShieldCheck className="w-5 h-5 text-amber-500 shrink-0" />
+              <p className="text-xs font-bold">
+                👑 Administrator View: You have moderation authority over this article.
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Link
+                to={`/edit-post/${post._id}`}
+                className="px-3 py-1.5 text-xs font-bold text-amber-800 dark:text-amber-200 bg-amber-200/60 dark:bg-amber-950/60 hover:bg-amber-200 rounded-xl transition-colors flex items-center gap-1"
+              >
+                <Edit className="w-3.5 h-3.5" />
+                Edit (Admin)
+              </Link>
+              <button
+                onClick={() => setShowDeleteModal(true)}
+                className="px-3 py-1.5 text-xs font-bold text-rose-700 dark:text-rose-300 bg-rose-100 dark:bg-rose-950/60 hover:bg-rose-200 rounded-xl transition-colors flex items-center gap-1"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                Delete (Admin)
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Navigation Back & Actions */}
         <div className="flex items-center justify-between">
           <button
             onClick={() => navigate(-1)}
@@ -137,25 +171,39 @@ const BlogDetailPage = () => {
             <span>Back to Articles</span>
           </button>
 
-          {/* Owner Action Buttons */}
-          {isOwner && (
-            <div className="flex items-center gap-2">
-              <Link
-                to={`/edit-post/${post._id}`}
-                className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-brand-700 dark:text-brand-300 bg-brand-50 dark:bg-brand-950/60 hover:bg-brand-100 dark:hover:bg-brand-900/60 rounded-xl transition-all border border-brand-200 dark:border-brand-800"
-              >
-                <Edit className="w-3.5 h-3.5" />
-                <span>Edit Article</span>
-              </Link>
+          <div className="flex items-center gap-2">
+            {/* Owner Action Buttons */}
+            {isOwner && !isAdmin && (
+              <>
+                <Link
+                  to={`/edit-post/${post._id}`}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-brand-700 dark:text-brand-300 bg-brand-50 dark:bg-brand-950/60 hover:bg-brand-100 dark:hover:bg-brand-900/60 rounded-xl transition-all border border-brand-200 dark:border-brand-800"
+                >
+                  <Edit className="w-3.5 h-3.5" />
+                  <span>Edit Article</span>
+                </Link>
+                <button
+                  onClick={() => setShowDeleteModal(true)}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/60 hover:bg-rose-100 dark:hover:bg-rose-900/60 rounded-xl transition-all border border-rose-200 dark:border-rose-800"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Delete</span>
+                </button>
+              </>
+            )}
+
+            {/* User Report Button */}
+            {!isOwner && (
               <button
-                onClick={() => setShowDeleteModal(true)}
-                className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/60 hover:bg-rose-100 dark:hover:bg-rose-900/60 rounded-xl transition-all border border-rose-200 dark:border-rose-800"
+                onClick={() => setShowReportModal(true)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl border border-slate-200 dark:border-slate-800 transition-colors"
+                title="Report this article"
               >
-                <Trash2 className="w-3.5 h-3.5" />
-                <span>Delete</span>
+                <Flag className="w-3.5 h-3.5" />
+                <span>Report</span>
               </button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
         {/* Header Info */}
@@ -274,12 +322,21 @@ const BlogDetailPage = () => {
         {/* Delete Confirmation Modal */}
         <ConfirmModal
           isOpen={showDeleteModal}
-          title="Delete Blog Post"
-          message="Are you sure you want to delete this blog post and all its associated comments? This action cannot be undone."
-          confirmText="Delete Post"
+          title={isAdmin && !isOwner ? 'Admin: Delete Blog Post' : 'Delete Blog Post'}
+          message={`Are you sure you want to permanently delete "${post.title}" and all its comments? This action cannot be undone.`}
+          confirmText={deleting ? 'Deleting...' : 'Delete Post'}
           isLoading={deleting}
           onConfirm={handleDeletePost}
           onCancel={() => setShowDeleteModal(false)}
+        />
+
+        {/* Report Article Modal */}
+        <ReportModal
+          isOpen={showReportModal}
+          onClose={() => setShowReportModal(false)}
+          targetType="post"
+          targetId={post._id}
+          targetTitle={post.title}
         />
 
         <BackToTop />

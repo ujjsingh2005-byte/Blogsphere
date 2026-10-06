@@ -12,41 +12,58 @@ The platform is designed with a **colorful, professional, accessible, and respon
 
 ---
 
-## 2. Core User Roles & Permissions Matrix
+## 2. Core User Roles & Role-Based Access Control (RBAC)
 
-### 2.1 User Roles
+### 2.1 User Roles Breakdown
 
 1. **Guest (Unauthenticated User)**
    - View Homepage, Hero Banner, Featured Posts, Latest Posts.
    - Browse and filter posts by Category.
    - Search posts by title, content, author, and tags.
-   - Read full blog post content.
-   - Read comments under blog posts.
-   - *Restrictions*: Cannot create, edit, or delete posts; cannot post or react to comments; prompted to sign in for interactive actions.
+   - Read full blog post content and comments.
+   - *Restrictions*: Cannot create, edit, or delete posts; cannot post comments; prompted to sign in for interactive actions.
 
-2. **Authenticated User (Author & Commenter)**
+2. **👤 Authenticated User (Writer, Reader & Commenter)**
    - Inherits all Guest capabilities.
    - **Post Management**: Create new blog posts, edit own posts, delete own posts.
-   - **Comment Management**: Add comments on any post, edit own comments, delete own comments.
-   - **Dashboard**: Access personalized metrics (Total Posts, Comments Received, Activity), view own post list, manage drafts/publications.
-   - **Profile Management**: Update profile details (Name, Bio, Profile Image / Avatar), view account creation date and stats.
-   - *Strict Authorization*: Users can **never** edit or delete posts/comments created by other users.
+   - **Comment Management**: Post comments on any story, edit own comments, delete own comments.
+   - **Community Moderation**: Submit content/user reports (Spam, Harassment, Hate Speech, etc.).
+   - **Personal Dashboard**: View personal publishing statistics, total comments received, total read time.
+   - **Profile Management**: Update profile image/avatar, full name, bio, and credentials.
+   - *Restrictions*: Cannot edit/delete content created by other users; cannot access Admin Command Center.
 
-### 2.2 Permissions Matrix
+3. **👑 Administrator (Platform Overseer & Content Moderator)**
+   - Inherits all Authenticated User capabilities.
+   - **Admin Command Center (`/admin`)**: Real-time platform KPI metrics (Total Users, Active vs Suspended, Posts, Comments, Reports).
+   - **User Management**: Search user directory, toggle suspension/block status, promote/demote user roles, delete accounts.
+   - **Post Moderation**: Override edit or delete any blog post across the platform to enforce guidelines.
+   - **Comment Moderation**: Review all platform comments and remove inappropriate or offending discussions.
+   - **Dynamic Category Management**: Create, edit, and delete platform categories with live post distribution counts.
+   - **Reports & Safety Queue**: Process user-submitted violation reports, mark status (Resolved/Dismissed), and record admin notes.
 
-| Action | Guest | Post Owner | Authenticated Non-Owner |
+### 2.2 Permissions Matrix: 👤 User vs 👑 Admin
+
+| Feature / Action | 🌐 Guest | 👤 User (Normal) | 👑 Admin (Platform Overseer) |
 | :--- | :---: | :---: | :---: |
-| **Browse / Search Posts** | ✅ | ✅ | ✅ |
-| **Read Blog Details** | ✅ | ✅ | ✅ |
-| **Read Comments** | ✅ | ✅ | ✅ |
-| **Create New Post** | ❌ | ✅ | ✅ |
-| **Edit Post** | ❌ | ✅ | ❌ |
-| **Delete Post** | ❌ | ✅ | ❌ |
-| **Create Comment** | ❌ | ✅ | ✅ |
-| **Edit Comment** | ❌ | ✅ *(own comment)* | ❌ *(other's comment)* |
-| **Delete Comment** | ❌ | ✅ *(own comment)* | ❌ *(other's comment)* |
-| **View Dashboard** | ❌ | ✅ | ✅ |
-| **Edit Profile** | ❌ | ✅ | ✅ |
+| **Register & Login** | ✅ | ✅ | ✅ |
+| **Browse & Search Posts** | ✅ | ✅ | ✅ |
+| **Read Full Articles & Comments** | ✅ | ✅ | ✅ |
+| **Create Blog Post** | ❌ | ✅ | ✅ |
+| **Edit Own Blog Post** | ❌ | ✅ | ✅ |
+| **Delete Own Blog Post** | ❌ | ✅ | ✅ |
+| **Edit Another User's Blog** | ❌ | ❌ | ✅ *(Admin Override)* |
+| **Delete Another User's Blog** | ❌ | ❌ | ✅ *(Admin Override)* |
+| **Post Comment** | ❌ | ✅ | ✅ |
+| **Edit Own Comment** | ❌ | ✅ | ✅ |
+| **Delete Own Comment** | ❌ | ✅ | ✅ |
+| **Delete Another User's Comment** | ❌ | ❌ | ✅ *(Admin Override)* |
+| **Submit Content Report** | ❌ | ✅ | ✅ |
+| **Access Admin Command Center (`/admin`)** | ❌ | ❌ | ✅ |
+| **View Platform Analytics & Metrics** | ❌ | ❌ | ✅ |
+| **Suspend / Block / Unblock Users** | ❌ | ❌ | ✅ |
+| **Manage User Roles (User ↔ Admin)** | ❌ | ❌ | ✅ |
+| **Manage Categories (Create/Edit/Delete)** | ❌ | ❌ | ✅ |
+| **Resolve / Dismiss Abuse Reports** | ❌ | ❌ | ✅ |
 
 ---
 

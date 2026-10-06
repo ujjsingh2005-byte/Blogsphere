@@ -35,6 +35,15 @@ const userSchema = new mongoose.Schema(
       type: String,
       maxlength: [250, 'Bio cannot exceed 250 characters'],
       default: ''
+    },
+    role: {
+      type: String,
+      enum: ['user', 'admin'],
+      default: 'user'
+    },
+    isBlocked: {
+      type: Boolean,
+      default: false
     }
   },
   {

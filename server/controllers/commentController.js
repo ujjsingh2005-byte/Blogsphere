@@ -9,7 +9,7 @@ export const getCommentsByPost = async (req, res, next) => {
     const { postId } = req.params;
 
     const comments = await Comment.find({ postId })
-      .populate('author', 'name email profileImage bio')
+      .populate('author', 'name email profileImage bio role')
       .sort({ createdAt: -1 });
 
     res.json({
@@ -52,7 +52,7 @@ export const addComment = async (req, res, next) => {
 
     const populatedComment = await Comment.findById(comment._id).populate(
       'author',
-      'name email profileImage bio'
+      'name email profileImage bio role'
     );
 
     res.status(201).json({
@@ -88,8 +88,11 @@ export const updateComment = async (req, res, next) => {
       });
     }
 
-    // Ownership check
-    if (comment.author.toString() !== req.user._id.toString()) {
+    // Ownership check (or admin)
+    const isOwner = comment.author.toString() === req.user._id.toString();
+    const isAdmin = req.user.role === 'admin';
+
+    if (!isOwner && !isAdmin) {
       return res.status(403).json({
         success: false,
         message: 'Unauthorized: You can only edit your own comments'
@@ -101,7 +104,7 @@ export const updateComment = async (req, res, next) => {
 
     const populated = await Comment.findById(updatedComment._id).populate(
       'author',
-      'name email profileImage bio'
+      'name email profileImage bio role'
     );
 
     res.json({
@@ -116,7 +119,7 @@ export const updateComment = async (req, res, next) => {
 
 // @desc    Delete a comment
 // @route   DELETE /api/comments/:id
-// @access  Private (Owner only)
+// @access  Private (Owner or Admin)
 export const deleteComment = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -129,8 +132,11 @@ export const deleteComment = async (req, res, next) => {
       });
     }
 
-    // Ownership check
-    if (comment.author.toString() !== req.user._id.toString()) {
+    // Ownership or Admin check
+    const isOwner = comment.author.toString() === req.user._id.toString();
+    const isAdmin = req.user.role === 'admin';
+
+    if (!isOwner && !isAdmin) {
       return res.status(403).json({
         success: false,
         message: 'Unauthorized: You can only delete your own comments'

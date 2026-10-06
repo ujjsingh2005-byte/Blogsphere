@@ -5,12 +5,21 @@
   "main": "server/server.js",
   "type": "module",
   "scripts": {
-    "start": "npm run start --prefix server",
+    "postinstall": "npm install --prefix server",
+    "start": "node server/server.js",
     "server": "npm run start --prefix server",
     "server:dev": "npm run dev --prefix server",
     "client": "npm run dev --prefix client",
     "seed": "npm run seed --prefix server",
     "build": "npm run build --prefix client"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.9.5"
   },
   "keywords": [
     "blog",

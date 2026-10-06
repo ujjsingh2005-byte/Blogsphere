@@ -1,0 +1,24 @@
+{
+  "name": "blogsphere",
+  "version": "1.0.0",
+  "description": "BlogSphere — Modern Full-Stack Blog Platform with Comments",
+  "scripts": {
+    "server": "npm run start --prefix server",
+    "server:dev": "npm run dev --prefix server",
+    "client": "npm run dev --prefix client",
+    "seed": "npm run seed --prefix server",
+    "build": "npm run build --prefix client"
+  },
+  "keywords": [
+    "blog",
+    "react",
+    "nodejs",
+    "express",
+    "mongodb",
+    "tailwind",
+    "jwt",
+    "fullstack"
+  ],
+  "author": "BlogSphere Team",
+  "license": "MIT"
+}

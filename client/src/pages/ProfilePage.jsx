@@ -1,0 +1,242 @@
+import React, { useState } from 'react';
+import { User, Mail, Shield, Sparkles, Check, RefreshCw, Trash2, Camera } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
+import { formatDate } from '../utils/dateUtils';
+
+const ProfilePage = () => {
+  const { user, updateProfile } = useAuth();
+  const { toastSuccess, toastError, toastInfo } = useToast();
+
+  const [formData, setFormData] = useState({
+    name: user?.name || '',
+    bio: user?.bio || '',
+    profileImage: user?.profileImage || '',
+    password: ''
+  });
+
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleGenerateRandomAvatar = () => {
+    const randomSeed = Math.random().toString(36).substring(7);
+    const newAvatar = `https://api.dicebear.com/7.x/avataaars/svg?seed=${randomSeed}`;
+    setFormData((prev) => ({ ...prev, profileImage: newAvatar }));
+    toastInfo('Generated new random avatar!');
+  };
+
+  const handleRemovePhoto = () => {
+    setFormData((prev) => ({ ...prev, profileImage: '' }));
+    toastInfo('Photo cleared (will use default avatar)');
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!formData.name.trim()) {
+      toastError('Name is required');
+      return;
+    }
+
+    if (formData.password && formData.password.length < 6) {
+      toastError('New password must be at least 6 characters long');
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      const payload = {
+        name: formData.name,
+        bio: formData.bio,
+        profileImage: formData.profileImage
+      };
+      if (formData.password) {
+        payload.password = formData.password;
+      }
+
+      await updateProfile(payload);
+      toastSuccess('Profile updated successfully!');
+      setFormData((prev) => ({ ...prev, password: '' }));
+    } catch (err) {
+      toastError(err.message || 'Failed to update profile');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const currentAvatar =
+    formData.profileImage ||
+    user?.profileImage ||
+    `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(user?.name || 'User')}`;
+
+  return (
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+      <div className="space-y-1.5">
+        <h1 className="text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-slate-100 font-display flex items-center gap-3">
+          <User className="w-7 h-7 text-brand-600 dark:text-brand-400" />
+          <span>Account Settings & Profile</span>
+        </h1>
+        <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+          Manage your public author persona, biography, and credentials.
+        </p>
+      </div>
+
+      <div className="bg-white dark:bg-navy-850 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-sm overflow-hidden">
+        {/* Profile Header Canvas */}
+        <div className="h-36 bg-gradient-to-r from-brand-600 via-accent-purple to-accent-pink relative"></div>
+
+        <div className="px-6 sm:px-10 pb-10 relative">
+          {/* Avatar Area */}
+          <div className="flex flex-col sm:flex-row items-center sm:items-end justify-between -mt-16 mb-8 gap-4">
+            <div className="relative group">
+              <img
+                src={currentAvatar}
+                alt={user?.name}
+                className="w-28 h-28 rounded-3xl object-cover ring-4 ring-white dark:ring-navy-850 shadow-2xl bg-slate-100 dark:bg-navy-900"
+              />
+              <button
+                type="button"
+                onClick={handleGenerateRandomAvatar}
+                title="Generate new random avatar"
+                className="absolute -bottom-2 -right-2 p-2 bg-slate-900 dark:bg-navy-950 text-white rounded-xl shadow-lg hover:bg-brand-600 transition-colors"
+              >
+                <RefreshCw className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleRemovePhoto}
+                className="px-3.5 py-2 text-xs font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl border border-rose-200 dark:border-rose-800 transition-colors flex items-center gap-1.5"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Remove Photo</span>
+              </button>
+              <div className="text-xs text-slate-400 dark:text-slate-500 font-semibold pl-2">
+                Joined {formatDate(user?.createdAt)}
+              </div>
+            </div>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Full Name & Email */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300">
+                  Full Name <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-4 py-3.5 bg-slate-50 dark:bg-navy-900 border border-slate-200 dark:border-slate-700/80 rounded-2xl text-sm font-bold text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white dark:focus:bg-navy-950 transition-all"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300">
+                  Email Address
+                </label>
+                <div className="relative">
+                  <input
+                    type="email"
+                    value={user?.email || ''}
+                    disabled
+                    className="w-full px-4 py-3.5 bg-slate-100 dark:bg-navy-900/60 border border-slate-200 dark:border-slate-800 rounded-2xl text-sm font-semibold text-slate-500 dark:text-slate-400 cursor-not-allowed"
+                  />
+                  <Mail className="w-4 h-4 text-slate-400 absolute right-4 top-1/2 -translate-y-1/2" />
+                </div>
+                <p className="text-[11px] text-slate-400 dark:text-slate-500">Email cannot be changed directly.</p>
+              </div>
+            </div>
+
+            {/* Profile Image URL */}
+            <div className="space-y-2">
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300">
+                Avatar / Custom Profile Image URL
+              </label>
+              <input
+                type="url"
+                name="profileImage"
+                value={formData.profileImage}
+                onChange={handleChange}
+                placeholder="https://images.unsplash.com/..."
+                className="w-full px-4 py-3.5 bg-slate-50 dark:bg-navy-900 border border-slate-200 dark:border-slate-700/80 rounded-2xl text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white dark:focus:bg-navy-950 transition-all"
+              />
+            </div>
+
+            {/* Biography */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300">
+                  Author Bio
+                </label>
+                <span className="text-xs text-slate-400 dark:text-slate-500 font-semibold">
+                  {formData.bio.length}/250
+                </span>
+              </div>
+              <textarea
+                name="bio"
+                rows="3"
+                value={formData.bio}
+                onChange={handleChange}
+                maxLength={250}
+                placeholder="Share a short summary about your background, interests, or writing focus..."
+                className="w-full p-4 bg-slate-50 dark:bg-navy-900 border border-slate-200 dark:border-slate-700/80 rounded-2xl text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white dark:focus:bg-navy-950 transition-all resize-none"
+              />
+            </div>
+
+            {/* Password Update (Optional) */}
+            <div className="pt-4 border-t border-slate-100 dark:border-slate-800 space-y-2">
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 flex items-center gap-1.5">
+                <Shield className="w-4 h-4 text-slate-400" />
+                <span>Change Password (Optional)</span>
+              </label>
+              <input
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="Leave blank to keep your current password"
+                className="w-full px-4 py-3.5 bg-slate-50 dark:bg-navy-900 border border-slate-200 dark:border-slate-700/80 rounded-2xl text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white dark:focus:bg-navy-950 transition-all"
+              />
+              <p className="text-[11px] text-slate-400 dark:text-slate-500">
+                Minimum 6 characters if you wish to reset your password.
+              </p>
+            </div>
+
+            {/* Submit Button */}
+            <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-end">
+              <button
+                type="submit"
+                disabled={submitting}
+                className="inline-flex items-center gap-2 px-9 py-4 bg-gradient-to-r from-brand-600 via-accent-purple to-accent-pink hover:from-brand-700 text-white font-extrabold text-sm rounded-2xl shadow-xl shadow-brand-500/25 transition-all hover:scale-105 active:scale-95 disabled:opacity-50"
+              >
+                {submitting ? (
+                  <>
+                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                    <span>Saving...</span>
+                  </>
+                ) : (
+                  <>
+                    <Check className="w-4 h-4" />
+                    <span>Save Changes</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ProfilePage;

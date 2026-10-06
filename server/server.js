@@ -29,7 +29,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Health Check API
-app.get('/api/health', (req, res) => {
+app.get(['/api/health', '/health'], (req, res) => {
   res.json({
     status: 'healthy',
     timestamp: new Date().toISOString(),
@@ -37,14 +37,27 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// API Routes
+// API Routes - Mount on both /api/ prefix and root path for universal client compatibility
 app.use('/api/auth', authRoutes);
+app.use('/auth', authRoutes);
+
 app.use('/api/users', userRoutes);
+app.use('/users', userRoutes);
+
 app.use('/api/posts', postRoutes);
+app.use('/posts', postRoutes);
+
 app.use('/api/comments', commentRoutes);
+app.use('/comments', commentRoutes);
+
 app.use('/api/stats', statsRoutes);
+app.use('/stats', statsRoutes);
+
 app.use('/api/admin', adminRoutes);
+app.use('/admin', adminRoutes);
+
 app.use('/api/reports', reportRoutes);
+app.use('/reports', reportRoutes);
 
 // Error Handling Middleware
 app.use(notFound);
